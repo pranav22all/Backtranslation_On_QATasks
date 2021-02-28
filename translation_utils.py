@@ -4,6 +4,13 @@ import nltk
 from BackTranslation import BackTranslation
 import time
 
+trans = BackTranslation()
+
+def get_backtranslate_codes():
+    print(trans.searchLanguage('French'))
+    print(trans.searchLanguage('German'))
+    print(trans.searchLanguage('Spanish'))
+    print(trans.searchLanguage('Dutch'))
 
 def backtranslate_dataset(data_dict, languages, prob=0.8, multiply_factor=100):
     """
@@ -18,7 +25,6 @@ def backtranslate_dataset(data_dict, languages, prob=0.8, multiply_factor=100):
     #TODO: Determine handling of ids
     new_data_dict = data_dict.copy() # Keep all original, non-backtranslated data
     num_questions = len(data_dict['question'])
-    trans = BackTranslation()
     nltk.download('punkt') #Make sure this line works as expected (sentence splitting)
     start = time.time()
 
@@ -49,13 +55,13 @@ def backtranslate_dataset(data_dict, languages, prob=0.8, multiply_factor=100):
             #At this point, we know the sentence with the answer, now backtranslate:
             translated_answer_sentence = None
             translated_context = ""
-#             if random.random() < prob: # translate question with random language
-#                 curr_question = trans.translate(curr_question, src = 'en', tmp = random.choice(languages)).result_text
+    #             if random.random() < prob: # translate question with random language
+    #                 curr_question = trans.translate(curr_question, src = 'en', tmp = random.choice(languages)).result_text
             for sent_index, curr_sentence in enumerate(sentences):
                 if random.random() < prob:
                     curr_sentence = trans.translate(curr_sentence, src = 'en', tmp = random.choice(languages)).result_text
                 if sent_index == answer_sent_index:
-#                     print(curr_sentence)
+    #                     print(curr_sentence)
                     translated_answer_sentence = curr_sentence
                     word_count_before_answer_sentence = len(translated_context)
                 translated_context += curr_sentence + " "
@@ -133,3 +139,7 @@ def compute_new_answer_span(translated_context, orig_answer):
     if best_jaccard < 0.45:
         return -1, ''
     return translated_context.find(translated_answer), translated_answer
+
+
+if __name__ == '__main__':
+    get_backtranslate_codes()
