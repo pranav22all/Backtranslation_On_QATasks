@@ -16,7 +16,7 @@ def get_backtranslate_codes():
     print(trans.searchLanguage('Swedish'))
     print(trans.searchLanguage('Norwegian'))
 
-def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.8, multiply_factor=100):
+def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.8, multiply_factor=30):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
     on the questions and contexts. Returns new_data_dict with additional
@@ -85,9 +85,10 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
             new_id = str(hash(translated_context + curr_question))
             new_data_dict['id'].append(new_id)  #Determine how to handle id properly
             new_data_dict['answer'].append(new_answer)
+        print("Finished multiply factor", multiply_factor)
     print(time.time() - start)
 
-    print("Successfully generated ", len(new_data_dict["question"]), " new examples")
+    print("Successfully generated", len(new_data_dict["question"]), "new examples")
     return new_data_dict
 
 
