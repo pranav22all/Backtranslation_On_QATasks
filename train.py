@@ -247,6 +247,8 @@ def get_dataset(args, datasets, data_dir, tokenizer, split_name):
     for dataset in datasets:
         dataset_name += f'_{dataset}'
         dataset_dict_curr = util.read_squad(f'{data_dir}/{dataset}')
+        #print("Potentially collapsed data_dict")
+        #print(dataset_dict_curr)
         dataset_dict = util.merge(dataset_dict, dataset_dict_curr)
     data_encodings = read_and_process(args, tokenizer, dataset_dict, data_dir, dataset_name, split_name)
     return util.QADataset(data_encodings, train=(split_name=='train')), dataset_dict

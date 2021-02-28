@@ -206,6 +206,9 @@ def read_squad(path):
                         data_dict['context'].append(context)
                         data_dict['id'].append(qa['id'])
                         data_dict['answer'].append(answer)
+
+    #print("Uncollapsed data_dict:")
+    #print(data_dict)
     id_map = ddict(list)
     for idx, qid in enumerate(data_dict['id']):
         id_map[qid].append(idx)
