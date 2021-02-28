@@ -259,7 +259,7 @@ def get_dataset(args, datasets, data_dir, tokenizer, split_name, do_backtranslat
     # with open("dataset_dict.json", "w+") as f:
     #     json.dump(dataset_dict, f, indent=4, sort_keys=True)
     if do_backtranslate:
-        dataset_dict = translation_utils.backtranslate_dataset(dataset_dict, ['zh', 'cn'], .9) #Change once defaults in place
+        dataset_dict = translation_utils.backtranslate_dataset(dataset_dict)
     data_encodings = read_and_process(args, tokenizer, dataset_dict, data_dir, dataset_name, split_name, do_backtranslate)
     return util.QADataset(data_encodings, train=(split_name=='train')), dataset_dict
 
