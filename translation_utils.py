@@ -49,28 +49,13 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
                     answer_sent_index = sent_index
                     break
 
-            #Can handle multiple answers in answer sentence utilizing something like this:
-            #word_ind_in_sent = sentences[answer_sent_index].find(curr_answer["text"], curr_total_word_index - curr_answer_start_index - 1)
-
             #At this point, we know the sentence with the answer, now backtranslate:
 #             if random.random() < prob: # translate question with random language
 #                 curr_question = trans.translate(curr_question, src = 'en', tmp = random.choice(languages)).result_text
             before_answer = ' '.join(sentences[:answer_sent_index])
             after_answer = ' '.join(sentences[answer_sent_index + 1:])
             answer_sentence = sentences[answer_sent_index]
-#             for sent_index, curr_sentence in enumerate(sentences):
-# #                 if random.random() < prob:
-#                     #curr_sentence = trans.translate(curr_sentence, src = 'en', tmp = random.choice(languages)).result_text
-#                     # Uncomment below for fairseq implementation
-# #                     encoder, decoder = random.choice(languages)
-# #                     intermediate = encoder.translate(curr_sentence)
-# #                     #print(intermediate)
-# #                     curr_sentence = decoder.translate(intermediate)
-#                 if sent_index == answer_sent_index:
-#                     answer_sentence = curr_sentence
-#                     before_answer = ' '.join(sentences[:sent_index])
-#                     after_answer = ' '.join(sentences[sent_index + 1:])
-#                     break
+
             if before_answer and random.random() < prob:
                 before_answer = trans.translate(before_answer, src = 'en', tmp = random.choice(languages)).result_text
             if random.random() < prob:
