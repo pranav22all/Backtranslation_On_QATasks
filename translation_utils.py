@@ -2,6 +2,7 @@ import math
 import random
 import nltk
 from BackTranslation import BackTranslation
+import time
 
 
 def backtranslate_dataset(data_dict, languages, prob=0.8, multiply_factor=100):
@@ -19,6 +20,7 @@ def backtranslate_dataset(data_dict, languages, prob=0.8, multiply_factor=100):
     num_questions = len(data_dict['question'])
     trans = BackTranslation()
     nltk.download('punkt') #Make sure this line works as expected (sentence splitting)
+    start = time.time()
 
     for i in range(multiply_factor):
         for curr_index in range(num_questions):
@@ -72,6 +74,7 @@ def backtranslate_dataset(data_dict, languages, prob=0.8, multiply_factor=100):
             new_id = str(hash(translated_context + curr_question))
             new_data_dict['id'].append(new_id)  #Determine how to handle id properly
             new_data_dict['answer'].append(new_answer)
+    print(time.time() - start)
 
     return new_data_dict
 
