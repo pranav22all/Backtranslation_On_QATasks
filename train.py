@@ -120,9 +120,13 @@ def prepare_train_data(dataset_dict, tokenizer):
 
 
 
-def read_and_process(args, tokenizer, dataset_dict, dir_name, dataset_name, split):
+def read_and_process(args, tokenizer, dataset_dict, dir_name, dataset_name, split, do_backtranslate):
     #TODO: cache this if possible
-    cache_path = f'{dir_name}/{dataset_name}_encodings.pt'
+    if do_backtranslate is False:
+        cache_path = f'{dir_name}/{dataset_name}_encodings.pt'
+    elif do_backtranslate is True:
+        cache_path = f'{dir_name}/{dataset_name}_encodings_backtranslate.pt'
+
     if os.path.exists(cache_path) and not args.recompute_features:
         tokenized_examples = util.load_pickle(cache_path)
     else:
@@ -254,7 +258,7 @@ def get_dataset(args, datasets, data_dir, tokenizer, split_name, do_backtranslat
         dataset_dict = util.merge(dataset_dict, dataset_dict_curr)
     if do_backtranslate:
         dataset_dict = translation_utils.backtranslate_dataset(dataset_dict, ['zh', 'cn'], .9) #Change once defaults in place
-    data_encodings = read_and_process(args, tokenizer, dataset_dict, data_dir, dataset_name, split_name)
+    data_encodings = read_and_process(args, tokenizer, dataset_dict, data_dir, dataset_name, split_name, do_backtranslate)
     return util.QADataset(data_encodings, train=(split_name=='train')), dataset_dict
 
 def main():
