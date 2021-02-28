@@ -8,7 +8,7 @@ def get_train_test_args():
     parser.add_argument('--num-visuals', type=int, default=10)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--save-dir', type=str, default='save/')
-    parser.add_argument('--load-from-checkpoint', action='store_false') #Tells us whether we're finetuning
+    parser.add_argument('--load-from-checkpoint', action='store_true') #Tells us whether we're finetuning
     parser.add_argument('--checkpoint-dir', type=str, default='save/') #Checkpoint for finetune to draw from
 
     parser.add_argument('--train', action='store_true')
@@ -23,7 +23,7 @@ def get_train_test_args():
     parser.add_argument('--eval-datasets', type=str, default='race,relation_extraction,duorc')
     parser.add_argument('--do-train', action='store_true')
     parser.add_argument('--do-eval', action='store_true')
-    parser.add_argument('--do-backtranslate', action='store_false') #Utilize backtranslation or not
+    parser.add_argument('--do-backtranslate', action='store_true') #Utilize backtranslation or not
     parser.add_argument('--sub-file', type=str, default='')
     parser.add_argument('--visualize-predictions', action='store_true')
     parser.add_argument('--eval-every', type=int, default=5000)
