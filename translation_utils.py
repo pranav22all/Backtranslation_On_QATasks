@@ -4,7 +4,7 @@ import nltk
 from BackTranslation import BackTranslation
 
 
-def backtranslate_dataset(data_dict, languages, prob)
+def backtranslate_dataset(data_dict, languages, prob=0.8, multiply_factor=100):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
     on the questions and contexts. Returns new_data_dict with additional
@@ -15,18 +15,19 @@ def backtranslate_dataset(data_dict, languages, prob)
     """
 
     #TODO: Determine handling of ids
-    new_data_dict = {'question': [], 'context': [], 'id': [], 'answer': []}
+    new_data_dict = data_dict.copy() # Keep all original, non-backtranslated data
     num_questions = len(data_dict['question'])
     trans = BackTranslation()
     nltk.download('punkt') #Make sure this line works as expected (sentence splitting)
 
-    for curr_index in range(num_questions):
-        curr_question, curr_context = new_data_dict['question'][curr_index], new_data_dict['context'][curr_index]
-        curr_id, curr_answer = new_data_dict['id'][curr_index], new_data_dict['answer'][curr_index]
+    for i in range(multiply_factor):
+        for curr_index in range(num_questions):
+            curr_question, curr_context = data_dict['question'][curr_index], data_dict['context'][curr_index]
+            curr_answer = data_dict['answer'][curr_index]
 
-        # Do backtranslation on this example:
-        if random.random() <= prob:
+            # Do backtranslation on this example:
             sentences = nltk.tokenize.sent_tokenize(curr_context) #will remove spaces at sentence start
+            #print(sentences)
 
             #Find which sentence the current answer appears in:
             curr_answer_start_index = curr_answer["answer_start"]
@@ -36,7 +37,7 @@ def backtranslate_dataset(data_dict, languages, prob)
             curr_total_word_index = 0
             for sent_index, curr_sentence in enumerate(sentences):
                 curr_total_word_index += len(curr_sentence) + 1 #Account for leading space
-                if curr_total_word_index >= curr_answer_start_index:
+                if curr_total_word_index > curr_answer_start_index:
                     answer_sent_index = sent_index
                     break
 
@@ -44,34 +45,33 @@ def backtranslate_dataset(data_dict, languages, prob)
             #word_ind_in_sent = sentences[answer_sent_index].find(curr_answer["text"], curr_total_word_index - curr_answer_start_index - 1)
 
             #At this point, we know the sentence with the answer, now backtranslate:
-            for curr_lang in languages:
-                translated_answer_sentence = None
-                translated_context = ""
-                translated_question = trans.translate(curr_question, src = 'en', tmp = curr_lang)
-                word_count_before_answer_sentence = 0
-                for sent_index, curr_sentence in enumerate(sentences):
-                    translated_sentence = trans.translate(curr_sentence, src = 'en', tmp = curr_lang)
-                    if sent_index == answer_sent_index:
-                        translated_answer_sentence = translated_sentence
-                        word_count_before_answer_sentence = len(translated_context) + 1 #Account for space
-                    translated_context += " " + translated_sentence
+            translated_answer_sentence = None
+            translated_context = ""
+#             if random.random() < prob: # translate question with random language
+#                 curr_question = trans.translate(curr_question, src = 'en', tmp = random.choice(languages)).result_text
+            for sent_index, curr_sentence in enumerate(sentences):
+                if random.random() < prob:
+                    curr_sentence = trans.translate(curr_sentence, src = 'en', tmp = random.choice(languages)).result_text
+                if sent_index == answer_sent_index:
+#                     print(curr_sentence)
+                    translated_answer_sentence = curr_sentence
+                    word_count_before_answer_sentence = len(translated_context)
+                translated_context += curr_sentence + " "
 
-                #Pass only a single sentence (context) and original answer into compute_new_answer_span:
-                new_answer_index, new_answer_text = compute_new_answer_span(translated_answer_sentence, curr_answer["text"])
-                new_answer = {"answer_start": word_count_before_answer_sentence + new_answer_index, "text": new_answer_text}
+            #Pass only a single sentence (context) and original answer into compute_new_answer_span:
+            new_answer_index, new_answer_text = compute_new_answer_span(translated_answer_sentence, curr_answer["text"])
+            if new_answer_index == -1: # No answer was found with a reasonable jaccard score
+                continue
+            new_answer = {"answer_start": word_count_before_answer_sentence + new_answer_index, "text": new_answer_text}
 
-                #Update new_data_dict accordingly:
-                new_data_dict['question'].append(translated_question)
-                new_data_dict['context'].append(translated_context)
-                #new_data_dict['id'].append(curr_id)  #Determine how to handle id properly
-                new_data_dict['answer'].append(new_answer)
+            translated_context = translated_context[:-1] # Chop off extra space
 
-        #Don't backtranslate here:
-        else:
+            #Update new_data_dict accordingly:
             new_data_dict['question'].append(curr_question)
-            new_data_dict['context'].append(curr_context)
-            new_data_dict['id'].append(curr_id)
-            new_data_dict['answer'].append(curr_answer)
+            new_data_dict['context'].append(translated_context)
+            new_id = str(hash(translated_context + curr_question))
+            new_data_dict['id'].append(new_id)  #Determine how to handle id properly
+            new_data_dict['answer'].append(new_answer)
 
     return new_data_dict
 
@@ -83,6 +83,7 @@ def compute_new_answer_span(translated_context, orig_answer):
     answer and returns a tuple of (index of answer, translated answer). If no
     answer has sufficient jaccard similarity, (-1, '') is returned.
     """
+    
     def compute_bigrams(token):
         return {token[i:i+2].lower() for i in range(len(token) - 1)}
 
@@ -94,9 +95,10 @@ def compute_new_answer_span(translated_context, orig_answer):
 
     def compute_jaccard(a, b):
         return len(a & b) / len(a | b)
-        answer_index = translated_context.find(orig_answer)
-        if answer_index != -1: # Got a complete match
-            return answer_index, orig_answer
+
+    answer_index = translated_context.find(orig_answer)
+    if answer_index != -1: # Got a complete match
+        return answer_index, orig_answer
     
     tokenized_answer = orig_answer.split(' ')
     tokenized_context = translated_context.split(' ')
