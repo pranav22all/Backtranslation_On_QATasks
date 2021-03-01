@@ -17,7 +17,7 @@ def get_backtranslate_codes():
     print(trans.searchLanguage('Swedish'))
     print(trans.searchLanguage('Norwegian'))
 
-def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.8, multiply_factor=30):
+def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.8, multiply_factor=1):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
     on the questions and contexts. Returns new_data_dict with additional
@@ -36,6 +36,7 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
         except Exception:
             sleeping_time = 1
             print("There was an exception while translating")
+            time.sleep(10)
             return excerpt, sleeping_time
 
     new_data_dict = data_dict.copy() # Keep all original, non-backtranslated data
@@ -103,7 +104,8 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
         time.sleep(15) # Avoid upsetting Google translate
     #print(time.time() - start)
 
-    print("Successfully generated", len(new_data_dict["question"]), "new examples")
+    print("Generated", len(new_data_dict["question"]), "total examples")
+    print("Backtranslate function complete")
     # with open("translated_output.json", "w+") as f:
     #     json.dump(new_data_dict, f, indent=4)
 
