@@ -3,6 +3,7 @@ import random
 import nltk
 from BackTranslation import BackTranslation
 import time
+import json
 
 trans = BackTranslation()
 
@@ -16,7 +17,7 @@ def get_backtranslate_codes():
     print(trans.searchLanguage('Swedish'))
     print(trans.searchLanguage('Norwegian'))
 
-def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.8, multiply_factor=30):
+def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.8, multiply_factor=1):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
     on the questions and contexts. Returns new_data_dict with additional
@@ -25,10 +26,19 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
     languages -> list of strings containing languages for backtranslation 
     prob -> probability a given input example is backtranslated on
     """
+    def translate_excerpt(excerpt, languages):
+        try:
+            translated = trans.translate(excerpt, src = 'en', tmp = random.choice(languages), sleeping=0.5).result_text
+            print("Translated successfully")
+            return translated
+        except Exception:
+            print("There was an exception while translating")
+            return excerpt
+
     new_data_dict = data_dict.copy() # Keep all original, non-backtranslated data
     num_questions = len(data_dict['question'])
     nltk.download('punkt') #Make sure this line works as expected (sentence splitting)
-    start = time.time()
+    #start = time.time()
 
     for i in range(multiply_factor):
         for curr_index in range(num_questions):
@@ -39,7 +49,7 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
             #print(sentences)
 
             #Find which sentence the current answer appears in:
-            curr_answer_start_index = curr_answer["answer_start"]
+            curr_answer_start_index = curr_answer["answer_start"][0]
             answer_sent_index = None
 
             curr_total_word_index = 0
@@ -57,11 +67,11 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
             answer_sentence = sentences[answer_sent_index]
 
             if before_answer and random.random() < prob:
-                before_answer = trans.translate(before_answer, src = 'en', tmp = random.choice(languages)).result_text
+                before_answer = translate_excerpt(before_answer, languages)
             if random.random() < prob:
-                answer_sentence = trans.translate(answer_sentence, src = 'en', tmp = random.choice(languages)).result_text
+                answer_sentence = translate_excerpt(answer_sentence, languages)
             if after_answer and random.random() < prob:
-                after_answer = trans.translate(after_answer, src = 'en', tmp = random.choice(languages)).result_text
+                after_answer = translate_excerpt(after_answer, languages)
             
             word_count_before_answer_sentence = 0
             translated_context = ''
@@ -73,22 +83,26 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
                 translated_context += ' ' + after_answer
                 
             #Pass only a single sentence (context) and original answer into compute_new_answer_span:
-            new_answer_index, new_answer_text = compute_new_answer_span(answer_sentence, curr_answer["text"])
+            new_answer_index, new_answer_text = compute_new_answer_span(answer_sentence, curr_answer["text"][0])
             if new_answer_index == -1: # No answer was found with a reasonable jaccard score
                 print("Skipping this question")
                 continue
-            new_answer = {"answer_start": word_count_before_answer_sentence + new_answer_index, "text": new_answer_text}
+            new_answer = {"answer_start": [word_count_before_answer_sentence + new_answer_index], "text": [new_answer_text]}
 
             #Update new_data_dict accordingly:
             new_data_dict['question'].append(curr_question)
             new_data_dict['context'].append(translated_context)
-            new_id = str(hash(translated_context + curr_question))
+            new_id = str(hash(translated_context + curr_question + str(random.random())))
             new_data_dict['id'].append(new_id)  #Determine how to handle id properly
             new_data_dict['answer'].append(new_answer)
-        print("Finished multiply factor", multiply_factor)
-    print(time.time() - start)
+        print("Finished round", i)
+        time.sleep(15) # Avoid upsetting Google translate
+    #print(time.time() - start)
 
     print("Successfully generated", len(new_data_dict["question"]), "new examples")
+    with open("translated_output.json", "w+") as f:
+        json.dump(new_data_dict, f, indent=4)
+
     return new_data_dict
 
 
