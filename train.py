@@ -258,7 +258,8 @@ def get_dataset(args, datasets, data_dir, tokenizer, split_name, do_backtranslat
     # Uncomment below to visualize the dataset dict
     # with open("dataset_dict.json", "w+") as f:
     #     json.dump(dataset_dict, f, indent=4, sort_keys=True)
-    if do_backtranslate:
+    # TODO: Make backtranslate a separate script so that we can run it separately from training (even locally)
+    if do_backtranslate and args.recompute_features: # Only redo backtranslate if we want to recompute features
         dataset_dict = translation_utils.backtranslate_dataset(dataset_dict)
     data_encodings = read_and_process(args, tokenizer, dataset_dict, data_dir, dataset_name, split_name, do_backtranslate)
     return util.QADataset(data_encodings, train=(split_name=='train')), dataset_dict
