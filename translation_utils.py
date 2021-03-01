@@ -100,8 +100,8 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
     #print(time.time() - start)
 
     print("Successfully generated", len(new_data_dict["question"]), "new examples")
-    with open("translated_output.json", "w+") as f:
-        json.dump(new_data_dict, f, indent=4)
+    # with open("translated_output.json", "w+") as f:
+    #     json.dump(new_data_dict, f, indent=4)
 
     return new_data_dict
 
