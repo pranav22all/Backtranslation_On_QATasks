@@ -17,7 +17,7 @@ def get_backtranslate_codes():
     print(trans.searchLanguage('Swedish'))
     print(trans.searchLanguage('Norwegian'))
 
-def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.8, multiply_factor=30):
+def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.9, multiply_factor=10):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
     on the questions and contexts. Returns new_data_dict with additional
@@ -100,8 +100,10 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
             new_data_dict['id'].append(new_id)  #Determine how to handle id properly
             new_data_dict['answer'].append(new_answer)
         print("Finished round", i)
+        print("Current size of new_data_dict is: ", len(new_data_dict["question"]))
+        print("*******")
         sleeping_time = 0.5
-        time.sleep(15) # Avoid upsetting Google translate
+        time.sleep(60) # Avoid upsetting Google translate
     #print(time.time() - start)
 
     print("Generated", len(new_data_dict["question"]), "total examples")
