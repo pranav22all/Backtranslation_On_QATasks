@@ -17,7 +17,7 @@ def get_backtranslate_codes():
     print(trans.searchLanguage('Swedish'))
     print(trans.searchLanguage('Norwegian'))
 
-def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.8, multiply_factor=1):
+def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.8, multiply_factor=30):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
     on the questions and contexts. Returns new_data_dict with additional
@@ -26,14 +26,17 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
     languages -> list of strings containing languages for backtranslation 
     prob -> probability a given input example is backtranslated on
     """
-    def translate_excerpt(excerpt, languages):
+    sleeping_time = 0.5
+    
+    def translate_excerpt(excerpt, languages, sleeping_time):
         try:
-            translated = trans.translate(excerpt, src = 'en', tmp = random.choice(languages), sleeping=0.5).result_text
-            print("Translated successfully")
-            return translated
+            translated = trans.translate(excerpt, src = 'en', tmp = random.choice(languages), sleeping=sleeping_time).result_text
+            print("Translated successfully", sleeping_time)
+            return translated, sleeping_time
         except Exception:
+            sleeping_time = 1
             print("There was an exception while translating")
-            return excerpt
+            return excerpt, sleeping_time
 
     new_data_dict = data_dict.copy() # Keep all original, non-backtranslated data
     num_questions = len(data_dict['question'])
@@ -67,11 +70,11 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
             answer_sentence = sentences[answer_sent_index]
 
             if before_answer and random.random() < prob:
-                before_answer = translate_excerpt(before_answer, languages)
+                before_answer, sleeping_time = translate_excerpt(before_answer, languages, sleeping_time)
             if random.random() < prob:
-                answer_sentence = translate_excerpt(answer_sentence, languages)
+                answer_sentence, sleeping_time = translate_excerpt(answer_sentence, languages, sleeping_time)
             if after_answer and random.random() < prob:
-                after_answer = translate_excerpt(after_answer, languages)
+                after_answer, sleeping_time = translate_excerpt(after_answer, languages, sleeping_time)
             
             word_count_before_answer_sentence = 0
             translated_context = ''
@@ -96,6 +99,7 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
             new_data_dict['id'].append(new_id)  #Determine how to handle id properly
             new_data_dict['answer'].append(new_answer)
         print("Finished round", i)
+        sleeping_time = 0.5
         time.sleep(15) # Avoid upsetting Google translate
     #print(time.time() - start)
 
