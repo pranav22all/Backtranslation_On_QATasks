@@ -24,9 +24,11 @@ def get_hard_backtranslate_codes():
     print(trans.searchLanguage('Turkish'))
     print(trans.searchLanguage('Finnish'))
     print(trans.searchLanguage('Hungarian'))
+    print(trans.searchLanguage('Korean'))
+    print(trans.searchLanguage('Hebrew'))
 
 #Modification #2: Utilize Harder Languages
-#languages = ['zh-cn', 'ja', 'ar', 'tr', 'fi', 'hu'] for hard task
+#languages = ['zh-cn', 'ja', 'ar', 'tr', 'fi', 'hu', 'ko', 'he'] for hard task
 def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.9, multiply_factor=10):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
