@@ -107,10 +107,10 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
             new_answer = {"answer_start": [word_count_before_answer_sentence + new_answer_index], "text": [new_answer_text]}
 
             #Modification #1: Translate Question
-            #trans_question, sleeping_time = translate_excerpt(curr_question, languages, sleeping_time)
+            trans_question, sleeping_time = translate_excerpt(curr_question, languages, sleeping_time)
 
             #Update new_data_dict accordingly:
-            new_data_dict['question'].append(curr_question) #Change this line for Mod #1
+            new_data_dict['question'].append(trans_question) #Change this line for Mod #1
             new_data_dict['context'].append(translated_context)
             new_id = str(hash(translated_context + curr_question + str(random.random())))
             new_data_dict['id'].append(new_id)
