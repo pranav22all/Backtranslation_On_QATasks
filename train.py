@@ -11,6 +11,7 @@ from transformers import AdamW
 from tensorboardX import SummaryWriter
 
 
+import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import RandomSampler, SequentialSampler
 from args import get_train_test_args
@@ -275,6 +276,18 @@ def main():
         model = DistilBertForQuestionAnswering.from_pretrained(checkpoint_path)
     else:
         model = DistilBertForQuestionAnswering.from_pretrained("distilbert-base-uncased")
+
+        if args.reinit: # Reinitilize the top layer
+            print("Reinitializing top layer")
+            state_dict = model.state_dict()
+            for param_name in state_dict:
+                if 'layer.5' in param_name:
+                    print("---Reinitializing", param_name)
+                    if 'bias' in param_name: # Zero biases
+                        state_dict[param_name] *= 0
+                    else:
+                        nn.init.normal_(state_dict[param_name], mean=0, std=0.02) # std from the paper
+                        
     tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
 
     if args.do_train:
