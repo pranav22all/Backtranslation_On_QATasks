@@ -7,7 +7,7 @@ import json
 
 trans = BackTranslation()
 
-def get_backtranslate_codes():
+def get_easy_backtranslate_codes():
     print(trans.searchLanguage('French'))
     print(trans.searchLanguage('German'))
     print(trans.searchLanguage('Spanish'))
@@ -17,6 +17,16 @@ def get_backtranslate_codes():
     print(trans.searchLanguage('Swedish'))
     print(trans.searchLanguage('Norwegian'))
 
+def get_hard_backtranslate_codes():
+    print(trans.searchLanguage('Chinese'))
+    print(trans.searchLanguage('Japanese'))
+    print(trans.searchLanguage('Arabic'))
+    print(trans.searchLanguage('Turkish'))
+    print(trans.searchLanguage('Finnish'))
+    print(trans.searchLanguage('Hungarian'))
+
+#Modification #2: Utilize Harder Languages
+#languages = ['zh-cn', 'ja', 'ar', 'tr', 'fi', 'hu'] for hard task
 def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.9, multiply_factor=10):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
@@ -31,8 +41,10 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
     def translate_excerpt(excerpt, languages, sleeping_time):
         try:
             translated = trans.translate(excerpt, src = 'en', tmp = random.choice(languages), sleeping=sleeping_time).result_text
+            #Modification #3: Multi-step Backtranslation
+            #final_translated = trans.translate(translated, src = 'en', tmp = random.choice(languages), sleeping=sleeping_time).result_text
             print("Translated successfully", sleeping_time)
-            return translated, sleeping_time
+            return translated, sleeping_time #Change translated to final_translated for Mod #3
         except Exception:
             sleeping_time = 1
             print("There was an exception while translating")
@@ -64,8 +76,6 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
                     break
 
             #At this point, we know the sentence with the answer, now backtranslate:
-#             if random.random() < prob: # translate question with random language
-#                 curr_question = trans.translate(curr_question, src = 'en', tmp = random.choice(languages)).result_text
             before_answer = ' '.join(sentences[:answer_sent_index])
             after_answer = ' '.join(sentences[answer_sent_index + 1:])
             answer_sentence = sentences[answer_sent_index]
@@ -93,11 +103,14 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
                 continue
             new_answer = {"answer_start": [word_count_before_answer_sentence + new_answer_index], "text": [new_answer_text]}
 
+            #Modification #1: Translate Question
+            #trans_question, sleeping_time = translate_excerpt(curr_question, languages, sleeping_time)
+
             #Update new_data_dict accordingly:
-            new_data_dict['question'].append(curr_question)
+            new_data_dict['question'].append(curr_question) #Change this line for Mod #1
             new_data_dict['context'].append(translated_context)
             new_id = str(hash(translated_context + curr_question + str(random.random())))
-            new_data_dict['id'].append(new_id)  #Determine how to handle id properly
+            new_data_dict['id'].append(new_id)
             new_data_dict['answer'].append(new_answer)
         print("Finished round", i)
         print("Current size of new_data_dict is: ", len(new_data_dict["question"]))
@@ -171,4 +184,4 @@ def compute_new_answer_span(translated_context, orig_answer):
 
 
 if __name__ == '__main__':
-    get_backtranslate_codes()
+    get_hard_backtranslate_codes()
