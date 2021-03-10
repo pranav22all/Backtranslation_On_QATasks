@@ -22,15 +22,14 @@ def get_hard_backtranslate_codes():
     print(trans.searchLanguage('Japanese'))
     print(trans.searchLanguage('Arabic'))
     print(trans.searchLanguage('Turkish'))
-    print(trans.searchLanguage('Finnish'))
     print(trans.searchLanguage('Hungarian'))
     print(trans.searchLanguage('Korean'))
     print(trans.searchLanguage('Hebrew'))
     print(trans.searchLanguage('Tamil'))
 
 #Modification #2: Utilize Harder Languages
-#languages = ['zh-cn', 'ja', 'ar', 'tr', 'fi', 'hu', 'ko', 'he', 'ta'] as possibilities (only keep 8)
-def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.9, multiply_factor=10):
+#languages = ['zh-cn', 'ja', 'ar', 'tr', 'hu', 'ko', 'he', 'ta'] as possibilities (only keep 8)
+def backtranslate_dataset(data_dict, languages = ['zh-cn', 'ja', 'ar', 'tr', 'hu', 'ko', 'he', 'ta'], prob=0.9, multiply_factor=10):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
     on the questions and contexts. Returns new_data_dict with additional
@@ -56,7 +55,7 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
 
     new_data_dict = data_dict.copy() # Keep all original, non-backtranslated data
     num_questions = len(data_dict['question'])
-    nltk.download('punkt') #Make sure this line works as expected (sentence splitting)
+    nltk.download('punkt')
     #start = time.time()
 
     for i in range(multiply_factor):
@@ -107,10 +106,10 @@ def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 
             new_answer = {"answer_start": [word_count_before_answer_sentence + new_answer_index], "text": [new_answer_text]}
 
             #Modification #1: Translate Question
-            trans_question, sleeping_time = translate_excerpt(curr_question, languages, sleeping_time)
+            #trans_question, sleeping_time = translate_excerpt(curr_question, languages, sleeping_time)
 
             #Update new_data_dict accordingly:
-            new_data_dict['question'].append(trans_question) #Change this line for Mod #1
+            new_data_dict['question'].append(curr_question) #Change this line for Mod #1
             new_data_dict['context'].append(translated_context)
             new_id = str(hash(translated_context + curr_question + str(random.random())))
             new_data_dict['id'].append(new_id)
