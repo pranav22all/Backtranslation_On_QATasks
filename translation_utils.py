@@ -42,10 +42,15 @@ def backtranslate_dataset(data_dict, languages = ['zh-cn', 'ja', 'ar', 'tr', 'hu
     
     def translate_excerpt(excerpt, languages, sleeping_time):
         try:
+            #print("Except is:")
+            #print(excerpt)
             translated = trans.translate(excerpt, src = 'en', tmp = random.choice(languages), sleeping=sleeping_time).result_text
             #Modification #3: Multi-step Backtranslation
             #final_translated = trans.translate(translated, src = 'en', tmp = random.choice(languages), sleeping=sleeping_time).result_text
             print("Translated successfully", sleeping_time)
+            #print("Translation is:")
+            #print(translated)
+            #print("*******")
             return translated, sleeping_time #Change translated to final_translated for Mod #3
         except Exception:
             sleeping_time = 1
