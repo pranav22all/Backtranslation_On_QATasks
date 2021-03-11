@@ -29,7 +29,7 @@ def get_hard_backtranslate_codes():
 
 #Modification #2: Utilize Harder Languages
 #languages = ['zh-cn', 'ja', 'ar', 'tr', 'hu', 'ko', 'he', 'ta'] as possibilities (only keep 8)
-def backtranslate_dataset(data_dict, languages = ['zh-cn', 'ja', 'ar', 'tr', 'hu', 'ko', 'he', 'ta'], prob=0.9, multiply_factor=10):
+def backtranslate_dataset(data_dict, languages = ['fr', 'de', 'es', 'nl', 'it', 'ru', 'sv', 'no'], prob=0.9, multiply_factor=10):
     """
     Takes in data_dict and list of languages, and performs backtranslation 
     on the questions and contexts. Returns new_data_dict with additional
@@ -46,12 +46,12 @@ def backtranslate_dataset(data_dict, languages = ['zh-cn', 'ja', 'ar', 'tr', 'hu
             #print(excerpt)
             translated = trans.translate(excerpt, src = 'en', tmp = random.choice(languages), sleeping=sleeping_time).result_text
             #Modification #3: Multi-step Backtranslation
-            #final_translated = trans.translate(translated, src = 'en', tmp = random.choice(languages), sleeping=sleeping_time).result_text
+            final_translated = trans.translate(translated, src = 'en', tmp = random.choice(languages), sleeping=sleeping_time).result_text
             print("Translated successfully", sleeping_time)
             #print("Translation is:")
             #print(translated)
             #print("*******")
-            return translated, sleeping_time #Change translated to final_translated for Mod #3
+            return final_translated, sleeping_time #Change translated to final_translated for Mod #3
         except Exception:
             sleeping_time = 1
             print("There was an exception while translating")
@@ -191,4 +191,4 @@ def compute_new_answer_span(translated_context, orig_answer):
 
 
 if __name__ == '__main__':
-    get_hard_backtranslate_codes()
+    get_easy_backtranslate_codes()
